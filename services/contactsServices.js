@@ -1,49 +1,46 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { nanoid } from 'nanoid';
-
-const contactsPath = path.resolve('./db/contacts.json');
-
-async function writeList(list) {
-  await fs.writeFile(contactsPath, JSON.stringify(list, null, 2));
-}
+import { Contact } from '../db/contact.js';
 
 export async function listContacts() {
-  const raw = await fs.readFile(contactsPath);
-  return JSON.parse(raw);
+  return await Contact.findAll();
 }
 
 export async function getContactById(contactId) {
-  const list = await listContacts();
-  return list.find(item => item.id === contactId) || null;
+  return await Contact.findByPk(contactId);
 }
 
 export async function removeContact(contactId) {
-  const list = await listContacts();
-  const index = list.findIndex(item => item.id === contactId);
-  if (index === -1) return null;
-  const deleted = list.splice(index, 1);
-  await writeList(list);
-  return deleted[0];
+  const contact = await getContactById(contactId);
+  if (!contact) return null;
+  await contact.destroy();
+  return contact;
 }
 
 export async function addContact(name, email, phone) {
-  const list = await listContacts();
-  const newItem = { name, email, phone, id: nanoid() };
-  list.push(newItem);
-  await writeList(list);
-  return newItem;
+  const newItem = await Contact.create({ name, email, phone });
+  return newItem.toJSON();
 }
 
 export async function updateContact(id, data) {
-  const list = await listContacts();
-  const contact = list.find(item => item.id === id);
-
+  const contact = await getContactById(id);
   if (!contact) return null;
 
-  Object.assign(contact, data);
+  Object.entries(data).forEach(([key, value]) => {
+    if (!value) return;
+    contact[key] = value;
+  });
 
-  await writeList(list);
+  await contact.save();
+
+  return contact;
+}
+
+export async function updateStatusContact(id, { favorite }) {
+  const contact = await getContactById(id);
+  if (!contact) return null;
+
+  contact.favorite = favorite;
+
+  await contact.save();
 
   return contact;
 }
