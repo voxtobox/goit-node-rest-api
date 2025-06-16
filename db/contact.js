@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from './index.js';
+import { sequelize } from './sequelize.js';
 
 export const Contact = sequelize.define('contact', {
   name: {
@@ -18,8 +18,8 @@ export const Contact = sequelize.define('contact', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  owner: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
-
-// (async () => {
-//   await Contact.sync({ force: true });
-// })();

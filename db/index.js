@@ -1,17 +1,12 @@
-import { Sequelize } from 'sequelize';
-import { DB_URL } from '../config/config.js';
+import { sequelize } from './sequelize.js';
+import { User } from './user.js';
+import { Contact } from './contact.js';
+import { setupAssociations } from './associations.js';
 
-export const sequelize = new Sequelize(DB_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: { rejectUnauthorized: false },
-  },
-});
+setupAssociations();
 
-try {
-  await sequelize.authenticate();
-  console.log('Database connection successful');
-} catch (error) {
-  console.error(error);
-  process.exit(1);
-}
+(async () => {
+  await sequelize.sync({ force: true });
+})();
+
+export { User, Contact };
