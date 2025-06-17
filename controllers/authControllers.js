@@ -26,3 +26,20 @@ export const loginUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const logoutUser = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    await authServices.logoutUser(id);
+
+    res.status(204).json();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserDataById = async (req, res, next) => {
+  const { id } = req.user;
+  const userData = await authServices.getUserDataById(id);
+  res.json(userData);
+};
