@@ -10,7 +10,6 @@ export const auth = async (req, res, next) => {
   try {
     const { authorization = '' } = req.headers;
     const [bearer, token] = authorization.split(' ');
-    console.log('token: ', token);
 
     if (bearer !== 'Bearer') throw getNotAuthorizeError();
 
