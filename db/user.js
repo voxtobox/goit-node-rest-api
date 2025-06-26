@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
+import gravatar from 'gravatar';
 import { sequelize } from './sequelize.js';
 
 export const User = sequelize.define(
@@ -23,12 +24,22 @@ export const User = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: null,
     },
+    avatarURL: {
+      type: DataTypes.STRING,
+    },
   },
   {
     hooks: {
       beforeCreate: async user => {
         if (user.password) {
           user.password = await bcrypt.hash(user.password, 10);
+        }
+        if (!user.avatarURL) {
+          user.avatarURL = gravatar.url(
+            user.email,
+            { s: '200', d: 'identicon' },
+            true
+          );
         }
       },
       beforeUpdate: async user => {
