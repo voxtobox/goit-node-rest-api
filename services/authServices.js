@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { SECRET } from '../config/config.js';
 import HttpError from '../helpers/HttpError.js';
@@ -48,4 +47,10 @@ export async function logoutUser(id) {
 export async function getUserDataById(id) {
   const user = await User.findByPk(id);
   return { email: user.email, subscription: user.subscription };
+}
+
+export async function setUserAvatar(id, avatarURL) {
+  const user = await User.findByPk(id);
+  await user.update({ avatarURL });
+  return { avatarURL };
 }
