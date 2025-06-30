@@ -46,7 +46,11 @@ export async function logoutUser(id) {
 
 export async function getUserDataById(id) {
   const user = await User.findByPk(id);
-  return { email: user.email, subscription: user.subscription };
+  return {
+    email: user.email,
+    subscription: user.subscription,
+    avatarURL: user.avatarURL,
+  };
 }
 
 export async function setUserAvatar(id, avatarURL) {
