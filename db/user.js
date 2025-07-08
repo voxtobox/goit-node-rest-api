@@ -27,6 +27,13 @@ export const User = sequelize.define(
     avatarURL: {
       type: DataTypes.STRING,
     },
+    verify: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    verificationToken: {
+      type: DataTypes.STRING,
+    },
   },
   {
     hooks: {

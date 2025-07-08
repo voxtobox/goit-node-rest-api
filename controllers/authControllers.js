@@ -61,3 +61,24 @@ export const setUserAvatar = async (req, res, next) => {
     next(error);
   }
 };
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const result = await authServices.verifyEmail(verificationToken);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendVerificationEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const result = await authServices.resendVerificationEmail(email);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import { SECRET } from '../config/config.js';
 import HttpError from '../helpers/HttpError.js';
 import { User } from '../db/index.js';
+import { nanoid } from 'nanoid';
+import { sendVerificationEmail } from './emailServices.js';
 
 export function signToken(id) {
   return jwt.sign({ id }, SECRET, { expiresIn: '24h' });
@@ -20,7 +22,11 @@ export async function addUser(email, password) {
 
   if (existingUser) throw HttpError(409, 'Email in use');
 
-  const user = await User.create({ email, password });
+  const verificationToken = nanoid();
+
+  const user = await User.create({ email, password, verificationToken });
+
+  await sendVerificationEmail(email, verificationToken);
   return user.toJSON();
 }
 
@@ -29,6 +35,10 @@ export async function loginUser(email, password) {
   if (!user) throw HttpError(401, 'Email or password is wrong');
   const isMatch = await user.validatePassword(password);
   if (!isMatch) throw HttpError(401, 'Email or password is wrong');
+
+  if (!user.verify) {
+    throw HttpError(401, 'Email not verified');
+  }
 
   const token = signToken(user.id);
 
@@ -57,4 +67,39 @@ export async function setUserAvatar(id, avatarURL) {
   const user = await User.findByPk(id);
   await user.update({ avatarURL });
   return { avatarURL };
+}
+
+export async function verifyEmail(verificationToken) {
+  const user = await User.findOne({ where: { verificationToken } });
+
+  if (!user) {
+    throw HttpError(404, 'User not found');
+  }
+
+  await user.update({ verify: true, verificationToken: null });
+
+  return { message: 'Verification successful' };
+}
+
+export async function resendVerificationEmail(email) {
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    throw HttpError(404, 'User not found');
+  }
+
+  if (user.verify) {
+    throw HttpError(400, 'Verification has already been passed');
+  }
+
+  let { verificationToken } = user;
+
+  if (!verificationToken) {
+    verificationToken = nanoid();
+    await user.update({ verificationToken });
+  }
+
+  await sendVerificationEmail(email, verificationToken);
+
+  return { message: 'Verification email sent' };
 }

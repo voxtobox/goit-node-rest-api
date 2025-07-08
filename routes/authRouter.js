@@ -5,10 +5,16 @@ import {
   logoutUser,
   getUserDataById,
   setUserAvatar,
+  verifyEmail,
+  resendVerificationEmail,
 } from '../controllers/authControllers.js';
 import validateBody from '../helpers/validateBody.js';
 import { auth } from '../auth/auth.js';
-import { createUserSchema, loginUserSchema } from '../schemas/authSchemas.js';
+import {
+  createUserSchema,
+  loginUserSchema,
+  emailSchema,
+} from '../schemas/authSchemas.js';
 import { uploadAvatar } from '../middleware/uploadAvatar.js';
 
 const authRouter = express.Router();
@@ -23,5 +29,7 @@ authRouter.patch(
   uploadAvatar.single('avatar'),
   setUserAvatar
 );
+authRouter.get('/verify/:verificationToken', verifyEmail);
+authRouter.post('/verify', validateBody(emailSchema), resendVerificationEmail);
 
 export default authRouter;
